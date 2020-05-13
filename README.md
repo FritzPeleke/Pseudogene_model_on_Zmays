@@ -7,13 +7,13 @@
 
 * from R studio console type
 
->library(BSgenome)
->forgeBSgenomeDataPkg('path/to/seed_file', 'path/to_save/source_tree')
+1. >library(BSgenome)
+2. >forgeBSgenomeDataPkg('path/to/seed_file', 'path/to_save/source_tree')
 
 * from terminal
-$cd 'path/to_save/source_tree'
-$R CMD build BSgenome.ZM.v3.31
-$R CMD install BSgenome.ZM.v3.31_1.0.tar.gz
+3. $cd 'path/to_save/source_tree'
+4. $R CMD build BSgenome.ZM.v3.31
+5. $R CMD install BSgenome.ZM.v3.31_1.0.tar.gz
 
 * Now running Get_pro_and_ter.R
 
