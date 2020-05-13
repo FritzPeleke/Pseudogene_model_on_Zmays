@@ -1,0 +1,17 @@
+Package: BSgenome.ZM.v3.31
+Title: Genome sequences for Zea mays (Ensembl v3.31)
+Description: A BSgenome package containing the full genome sequences for Zea mays (Maize) as provided by Ensembl plants
+Version: 1.0
+organism: Zea mays
+common_name: Maize
+provider: Ensembl plansts
+provider_version: Zmv3
+release_date: May. 2017
+release_name: B73
+source_url: NA
+circ_seqs: c("Mt","Pt")
+organism_biocview: zmv3
+BSgenomeObjname: zmv3
+seqs_srcdir: /Users/fritzpeleke/PycharmProjects/Pseudo_model/Zmays.Ensembl_v3_31
+seqfiles_suffix: .fa.gz
+seqnames: as.character(strsplit(list.files("/Users/fritzpeleke/PycharmProjects/Pseudo_model/Zmays.Ensembl_v3_31",pattern="*.fa.gz"),split=".fa.gz"))
