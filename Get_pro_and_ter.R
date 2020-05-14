@@ -1,16 +1,14 @@
-"""
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
 
-BiocManager::install("BSgenome")
+#BiocManager::install("BSgenome")
 
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
 
-BiocManager::install("GenomicFeatures")
+#BiocManager::install("GenomicFeatures")
 
-BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
-"""
+#BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
 #using self create BSgenome for zmays v3.31. see seed_file and readme for creating it. Note all ambiguous characters are converted to N
 
 library(GenomicFeatures)

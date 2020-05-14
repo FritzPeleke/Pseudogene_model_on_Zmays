@@ -30,6 +30,7 @@ for i, tup in enumerate(hard_clusters):
     for idx in tup:
         gene_families.append([i, nodes[idx]])
 
+# writing to csv
 fam_df = pd.DataFrame(gene_families, columns=['family_id', 'Gene_id'])
 fam_df.to_csv('gene_families.csv')
 

@@ -47,5 +47,3 @@ blast_result = blast_result.drop_duplicates(subset='pairs', keep='first')
 blast_result = blast_result.sort_values(by=['pairs', 'bitscore'], ascending=True)
 
 blast_result.to_csv(write_path, index=False)
-
-
