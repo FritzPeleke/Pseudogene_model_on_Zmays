@@ -15,7 +15,7 @@ edges_with_weights = [(data['qgene'][i], data['sgene'][i],
                        data['bitscore'][i]) for i in range(data.shape[0])]
 G = nx.Graph()
 G.add_weighted_edges_from(edges_with_weights)
-nodes= list(G.nodes())
+nodes = list(G.nodes())
 
 # Getting adjacency matrix
 matrix = nx.to_scipy_sparse_matrix(G)
@@ -33,4 +33,3 @@ for i, tup in enumerate(hard_clusters):
 # writing to csv
 fam_df = pd.DataFrame(gene_families, columns=['family_id', 'Gene_id'])
 fam_df.to_csv('gene_families.csv')
-
