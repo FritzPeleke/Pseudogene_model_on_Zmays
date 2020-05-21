@@ -1,14 +1,17 @@
-import pandas as pd
 import numpy as np
+from tensorflow.compat.v1 import set_random_seed
+import pandas as pd
 from Bio import SeqIO
 from tensorflow.python.keras.utils import np_utils
-import random
 import itertools
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, MaxPool2D, Flatten
 from tensorflow.keras import Sequential
 from tensorflow.keras import backend
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+
 np.random.seed(42)
+set_random_seed(42)
+
 
 Data = pd.read_csv('Data.csv', usecols=['Gene_id', 'label', 'max_TPM', 'sample'])
 Data.set_index('Gene_id', inplace=True)
@@ -92,14 +95,15 @@ codes = {'A': [1, 0, 0, 0],
          'G': [0, 0, 1, 0],
          'T': [0, 0, 0, 1]}
 
+
 def onehot_encoder(seq):
     one_hot_encoded = np.zeros(shape=(4, len(seq)))
     for i, nt in enumerate(seq):
         one_hot_encoded[:, i] = codes[nt]
     return one_hot_encoded
 
-# Encoding normal sequenecs
 
+# Encoding normal sequenecs
 one_hot_seq = np.expand_dims(np.array([onehot_encoder(seq) for seq in seqs], dtype=np.float32), 3)
 one_hot_pro = np.expand_dims(np.array([onehot_encoder(seq) for seq in seq_prom], dtype=np.float32), 3)
 one_hot_ter = np.expand_dims(np.array([onehot_encoder(seq) for seq in seq_ter], dtype=np.float32), 3)
@@ -167,15 +171,11 @@ def create_sets(sequences, label):
     return x_train, y_train, x_test, y_test
 
 
-def reset_session():
-    backend.clear_session()
-
-reset_session()
-
 model = Sequential()
 
 model.add(Conv2D(64, kernel_size=(4, 8), padding='valid', input_shape=[4, 3000, 1],
                  activation='relu'))
+model.add(Conv2D(64, kernel_size=(1, 8), padding='same', activation='relu'))
 model.add(Conv2D(64, kernel_size=(1, 8), padding='same', activation='relu'))
 model.add(MaxPool2D(pool_size=(1, 8), strides=(1, 8), padding='same'))
 model.add(Dropout(0.25))
@@ -191,20 +191,17 @@ model.add(MaxPool2D(pool_size=(1, 8), strides=(1, 8), padding='same'))
 model.add(Dropout(0.25))
 
 model.add(Flatten())
-model.add(Dense(128,'relu'))
+model.add(Dense(128, 'relu'))
 model.add(Dropout(0.25))
-model.add(Dense(64,'relu'))
-model.add(Dense(2,'softmax'))
+model.add(Dense(64, 'relu'))
+model.add(Dense(2, 'softmax'))
 
 print(model.summary())
 
-Er_Stop = EarlyStopping(monitor='val_loss', patience=4, verbose=0)
-RL = ReduceLROnPlateau(monitor='val_loss', patience=2)
+Er_Stop = EarlyStopping(monitor='val_loss', patience=3, verbose=0)
 x_train, y_train, x_test, y_test = create_sets(one_hot_seq, labels)
 
 model.compile(loss='binary_crossentropy', optimizer='Adam', metrics=['accuracy'])
 model.fit(x_train, y_train, batch_size=256, epochs=40,
-          validation_data=(x_test, y_test), callbacks=[Er_Stop, RL])
-
-
-
+          validation_data=(x_test, y_test), callbacks=[Er_Stop])
+backend.clear_session()
