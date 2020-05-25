@@ -8,11 +8,15 @@ from tensorflow.keras.layers import Dense, Conv2D, Dropout, MaxPool2D, Flatten
 from tensorflow.keras import Sequential
 from tensorflow.keras import backend
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+import pickle
+from sklearn.metrics import confusion_matrix, accuracy_score
+from datetime import datetime
 
 np.random.seed(42)
 set_random_seed(42)
 
 
+RESULT_DIR = 'Results/'
 Data = pd.read_csv('Data.csv', usecols=['Gene_id', 'label', 'max_TPM', 'sample'])
 Data.set_index('Gene_id', inplace=True)
 
@@ -161,14 +165,17 @@ def train_test_select():
     return train_indices, test_indices
 
 
-def create_sets(sequences, label):
+def create_sets(sequences, label, GeneIDS):
+    GeneIDS = np.array(GeneIDS)
     train_indx, test_indx = train_test_select()
     x_train = sequences[train_indx]
     y_train = label[train_indx]
     x_test = sequences[test_indx]
     y_test = label[test_indx]
+    train_genes = GeneIDS[train_indx]
+    test_genes = GeneIDS[test_indx]
 
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_test, y_test, test_genes, train_genes
 
 
 model = Sequential()
@@ -199,9 +206,24 @@ model.add(Dense(2, 'softmax'))
 print(model.summary())
 
 Er_Stop = EarlyStopping(monitor='val_loss', patience=3, verbose=0)
-x_train, y_train, x_test, y_test = create_sets(one_hot_seq, labels)
+x_train, y_train, x_test, y_test, test_genes, train_genes = create_sets(one_hot_seq, labels, geneID)
 
 model.compile(loss='binary_crossentropy', optimizer='Adam', metrics=['accuracy'])
 model.fit(x_train, y_train, batch_size=256, epochs=40,
           validation_data=(x_test, y_test), callbacks=[Er_Stop])
+
+predictions = model.predict(x_test)
+y_pred = np.argmax(predictions, axis=1)
+y_true = np.argmax(y_test, axis=1)
+accuracy = accuracy_score(y_true, y_pred)
+tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+
+now = datetime.now().strftime('%Y-%m-%d%H%M%S')
+model.save(RESULT_DIR+'model'+now)
+pickle.dump([test_genes, y_test, predictions], open(RESULT_DIR+'PICKLE'+now, 'wb'))
+with open(RESULT_DIR+'SUMMARY_FILE', 'a') as f:
+    f.write('\t'.join([now, str(tp), str(tn), str(fp), str(fn), str(accuracy)]))
+
+print(accuracy)
+del model
 backend.clear_session()
