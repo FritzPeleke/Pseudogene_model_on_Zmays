@@ -1,25 +1,28 @@
 import numpy as np
-from tensorflow.compat.v1 import set_random_seed
+from tensorflow import set_random_seed
 import pandas as pd
 from Bio import SeqIO
 from tensorflow.python.keras.utils import np_utils
 import itertools
-from tensorflow.keras.layers import Dense, Conv2D, Dropout, MaxPool2D, Flatten
+from tensorflow.keras.layers import Dense, Conv2D, Dropout, MaxPool2D, Flatten, Activation
 from tensorflow.keras import Sequential
 from tensorflow.keras import backend
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.callbacks import EarlyStopping
 import pickle
 from sklearn.metrics import confusion_matrix, accuracy_score
 from datetime import datetime
+import random
+import os
 
 np.random.seed(42)
 set_random_seed(42)
-
+random.seed(42)
+if not os.path.exists('Results'):
+    os.mkdir('Results')
 
 RESULT_DIR = 'Results/'
 Data = pd.read_csv('Data.csv', usecols=['Gene_id', 'label', 'max_TPM', 'sample'])
 Data.set_index('Gene_id', inplace=True)
-
 
 geneID = []
 geneDes = []
@@ -77,7 +80,8 @@ for Prec, Trec in zip(SeqIO.parse('promoter.fa', 'fasta'), SeqIO.parse('terminat
 
 
 # Parsing di-nucleotide shuffled sequences
-for Prec, Trec in zip(SeqIO.parse('dinucl_shuf_promoters.fa', 'fasta'), SeqIO.parse('dinucl_shuf_terminators.fa', 'fasta')):
+for Prec, Trec in zip(SeqIO.parse('dinucl_shuf_promoters.fa', 'fasta'),
+                      SeqIO.parse('dinucl_shuf_terminators.fa', 'fasta')):
     ID = Prec.id
     seq_prom = str(Prec.seq)
     seq_term = str(Trec.seq)
@@ -177,31 +181,39 @@ def create_sets(sequences, label, GeneIDS):
 
     return x_train, y_train, x_test, y_test, test_genes, train_genes
 
+backend.clear_session()
 
 model = Sequential()
 
-model.add(Conv2D(64, kernel_size=(4, 8), padding='valid', input_shape=[4, 3000, 1],
-                 activation='relu'))
-model.add(Conv2D(64, kernel_size=(1, 8), padding='same', activation='relu'))
-model.add(Conv2D(64, kernel_size=(1, 8), padding='same', activation='relu'))
+model.add(Conv2D(64, kernel_size=(4, 8), padding='valid', input_shape=[4, 3000, 1]))
+model.add(Activation('relu'))
+model.add(Conv2D(64, kernel_size=(1, 8), padding='same'))
+model.add(Activation('relu'))
 model.add(MaxPool2D(pool_size=(1, 8), strides=(1, 8), padding='same'))
 model.add(Dropout(0.25))
 
-model.add(Conv2D(128, kernel_size=(1, 8), padding='same', activation='relu'))
-model.add(Conv2D(128, kernel_size=(1, 8), padding='same', activation='relu'))
+model.add(Conv2D(128, kernel_size=(1, 8), padding='same'))
+model.add(Activation('relu'))
+model.add(Conv2D(128, kernel_size=(1, 8), padding='same'))
+model.add(Activation('relu'))
 model.add(MaxPool2D(pool_size=(1, 8), strides=(1, 8), padding='same'))
 model.add(Dropout(0.25))
 
-model.add(Conv2D(64, kernel_size=(1, 8), padding='same', activation='relu'))
-model.add(Conv2D(64, kernel_size=(1, 8), padding='same', activation='relu'))
+model.add(Conv2D(64, kernel_size=(1, 8), padding='same'))
+model.add(Activation('relu'))
+model.add(Conv2D(64, kernel_size=(1, 8), padding='same'))
+model.add(Activation('relu'))
 model.add(MaxPool2D(pool_size=(1, 8), strides=(1, 8), padding='same'))
 model.add(Dropout(0.25))
 
 model.add(Flatten())
-model.add(Dense(128, 'relu'))
+model.add(Dense(128))
+model.add(Activation('relu'))
 model.add(Dropout(0.25))
-model.add(Dense(64, 'relu'))
-model.add(Dense(2, 'softmax'))
+model.add(Dense(64))
+model.add(Activation('relu'))
+model.add(Dense(2))
+model.add(Activation('softmax'))
 
 print(model.summary())
 
@@ -219,7 +231,7 @@ accuracy = accuracy_score(y_true, y_pred)
 tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
 
 now = datetime.now().strftime('%Y-%m-%d%H%M%S')
-model.save(RESULT_DIR+'model'+now)
+model.save('Results/'+'model' + now + '.h5')
 pickle.dump([test_genes, y_test, predictions], open(RESULT_DIR+'PICKLE'+now, 'wb'))
 with open(RESULT_DIR+'SUMMARY_FILE', 'a') as f:
     f.write('\t'.join([now, str(tp), str(tn), str(fp), str(fn), str(accuracy)]))
