@@ -8,7 +8,7 @@ from tensorflow.keras import models
 from deeplift.layers import NonlinearMxtsMode
 from deeplift.conversion import kerasapi_conversion as kc
 from deeplift.dinuc_shuffle import dinuc_shuffle
-
+import matplotlib.pyplot as plt
 np.random.seed(42)
 tensorflow.set_random_seed(42)
 
@@ -121,3 +121,14 @@ scores_tp = np.array(deeplift_contribs_func(task_idx=1, input_data_list=[tp_data
 scores_tn = np.array(deeplift_contribs_func(task_idx=1, input_data_list=[tn_data],
                                             input_references_list=[tn_shuf_data], batch_size=10,
                                             progress_update=1000))
+
+av_tp_scores = np.squeeze(np.average(scores_tp, axis=0))
+av_tn_scores = np.squeeze(np.average(scores_tn, axis=0))
+
+final_tp_scores = np.average(av_tp_scores, axis=0)
+final_tn_scores = np.average(av_tn_scores, axis=0)
+
+plt.plot(final_tp_scores)
+plt.axhspan(-0.0002, 0)
+plt.grid()
+plt.show()
