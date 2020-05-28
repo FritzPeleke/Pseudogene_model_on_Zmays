@@ -9,6 +9,7 @@ from deeplift.layers import NonlinearMxtsMode
 from deeplift.conversion import kerasapi_conversion as kc
 from deeplift.dinuc_shuffle import dinuc_shuffle
 import matplotlib.pyplot as plt
+import seaborn as sns
 np.random.seed(42)
 tensorflow.set_random_seed(42)
 
@@ -128,7 +129,7 @@ av_tn_scores = np.squeeze(np.average(scores_tn, axis=0))
 final_tp_scores = np.average(av_tp_scores, axis=0)
 final_tn_scores = np.average(av_tn_scores, axis=0)
 
+sns.set()
 plt.plot(final_tp_scores)
-plt.axhspan(-0.0002, 0)
-plt.grid()
+plt.axhspan(-0.00025, 0, alpha=0.3, color='r')
 plt.show()
