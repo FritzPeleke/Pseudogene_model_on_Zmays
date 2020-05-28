@@ -129,7 +129,13 @@ av_tn_scores = np.squeeze(np.average(scores_tn, axis=0))
 final_tp_scores = np.average(av_tp_scores, axis=0)
 final_tn_scores = np.average(av_tn_scores, axis=0)
 
-sns.set()
-plt.plot(final_tp_scores)
-plt.axhspan(-0.00025, 0, alpha=0.3, color='r')
-plt.show()
+
+def visualise(data):
+    sns.set()
+    plt.plot(data)
+    plt.axhspan(-0.00025, 0, alpha=0.3, color='r')
+    plt.text(500, -0.00020, 'Promoter', fontweight='bold')
+    plt.text(2000, -0.00020, 'Terminator', fontweight='bold')
+    plt.show()
+
+visualise(final_tp_scores)
