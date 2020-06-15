@@ -34,6 +34,7 @@ def adjust_gtf(file, vcf_file):
     df = df[df['Feature'] == 'gene']
     df = df[df['gene_biotype'] == 'protein_coding']
     df = df[['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'gene_id']]
+    df = df[df['Chromosome'].isin(['1', '2', '3', '4', '5'])]# To ensure we use just chromosome 1-5, excluding Mt and Pt
     df.reset_index(inplace=True, drop=True)
     for idx, shift in enumerate(vcf['SHIFT']):
         if shift != 0:
