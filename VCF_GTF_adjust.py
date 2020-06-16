@@ -59,4 +59,5 @@ for file in os.listdir('/nam-99/ablage/nam/peleke/vcf_files'):
     ecotype_id = file.split('_')[1].split('.')[0]
     file_name_new_gtf = '/nam-99/ablage/nam/peleke/variant_gtfs/' + ecotype_id + '.gtf'
     ref_gtf = '/nam-99/ablage/nam/peleke/Arabidopsis_thaliana.TAIR10.46.gtf'
-    adjust_gtf(ref_gtf, vcf, file_name_new_gtf)
+    if not os.path.isfile(file_name_new_gtf):
+        adjust_gtf(ref_gtf, vcf, file_name_new_gtf)
