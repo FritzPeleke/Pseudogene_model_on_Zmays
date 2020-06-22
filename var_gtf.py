@@ -23,7 +23,7 @@ def edit_vcf(input_vcf, chr_no):
 
 def edit_gtf(input_gtf, chr_no):
     df = pr.read_gtf(input_gtf).df
-    df = df[['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Strand', 'gene_id', 'gene_biotype']]
+    df = df[['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'gene_id', 'gene_biotype']]
     df = df[df['Feature'] == 'gene']
     df = df[df['gene_biotype'] == 'protein_coding']
     df.drop(df[df['Chromosome'] == 'Mt'].index, inplace=True)
