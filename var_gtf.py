@@ -1,5 +1,6 @@
 import pyranges as pr
 import pandas as pd
+import os
 pd.options.display.width = 0
 
 
@@ -42,8 +43,9 @@ def max_less(iterable, val):
     return max(a, default='None')
 
 
-def get_closest(in_vcf, in_gtf):
+def get_gtfvariant(in_vcf, in_gtf, out_gtf):
     print('Processing')
+    edited_gtfs = []
 
     for vcf, gtf in zip(in_vcf, in_gtf):
         closest_to_start = []
@@ -51,8 +53,6 @@ def get_closest(in_vcf, in_gtf):
         pos = vcf['POS'].tolist()
         Starts = gtf['Start'].tolist()
         Ends = gtf['End'].tolist()
-        print(vcf.tail(2))
-        print(gtf.tail(2))
         for start in Starts:
             closest_to_start.append(max_less(pos, start))
         for end in Ends:
@@ -73,10 +73,22 @@ def get_closest(in_vcf, in_gtf):
                         for start, cum, pos in zip(gtf['Start'], gtf['start_shift'], gtf['pos_nearest_tostrt'])]
         gtf['End'] = [end + cum if end > pos else end
                       for end, cum, pos in zip(gtf['End'], gtf['end_shift'], gtf['pos_nearest_toend'])]
-
-        print(gtf.tail(2))
+        gtf['Feature'] = gtf['Feature'].astype(str) + ':' + gtf['gene_id'].astype(str)
+        edited_gtfs.append(gtf)
+    final_gtf = pd.concat(edited_gtfs)
+    final_gtf.reset_index(drop=True, inplace=True)
+    final_gtf.drop(labels=['start_shift', 'end_shift', 'pos_nearest_tostrt', 'pos_nearest_toend'], inplace=True,
+                   axis=1)
+    final_gtf.to_csv(out_gtf, index=False, header=False, sep='\t')
+    print(final_gtf.tail())
+    print(final_gtf.shape)
 
 
 gtf = edit_gtf('Arabidopsis_thaliana.TAIR10.46.gtf', 5)
-vcf = edit_vcf('intersection_10001.vcf', 5)
-get_closest(vcf, gtf)
+
+for file in os.listdir('/nam-99/ablage/nam/peleke/vcf_files'):
+    vcf_path = '/nam-99/ablage/nam/peleke/vcf_files/' + file
+    vcf = edit_vcf(vcf_path, 5)
+    ecotype_id = file.split('_')[1].split('.')[0]
+    output_gtf = '/nam-99/ablage/nam/peleke/variant_gtfs/' + ecotype_id + '.gtf'
+    get_gtfvariant(vcf, gtf, output_gtf)
