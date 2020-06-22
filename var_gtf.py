@@ -53,6 +53,7 @@ def get_gtfvariant(in_vcf, in_gtf, out_gtf):
         pos = vcf['POS'].tolist()
         Starts = gtf['Start'].tolist()
         Ends = gtf['End'].tolist()
+        print(vcf.tail(2))
         for start in Starts:
             closest_to_start.append(max_less(pos, start))
         for end in Ends:
@@ -75,18 +76,20 @@ def get_gtfvariant(in_vcf, in_gtf, out_gtf):
                       for end, cum, pos in zip(gtf['End'], gtf['end_shift'], gtf['pos_nearest_toend'])]
         gtf['Feature'] = gtf['Feature'].astype(str) + ':' + gtf['gene_id'].astype(str)
         edited_gtfs.append(gtf)
+        print(gtf.tail(2))
     final_gtf = pd.concat(edited_gtfs)
     final_gtf.reset_index(drop=True, inplace=True)
     final_gtf.drop(labels=['start_shift', 'end_shift', 'pos_nearest_tostrt', 'pos_nearest_toend'], inplace=True,
                    axis=1)
-    final_gtf.to_csv(out_gtf, index=False, header=False, sep='\t')
+
     print(final_gtf.tail())
     print(final_gtf.shape)
 
+    return final_gtf.to_csv(out_gtf, index=False, header=False, sep='\t')
 
-gtf = edit_gtf('Arabidopsis_thaliana.TAIR10.46.gtf', 5)
 
 for file in os.listdir('/nam-99/ablage/nam/peleke/vcf_files'):
+    gtf = edit_gtf('Arabidopsis_thaliana.TAIR10.46.gtf', 5)
     vcf_path = '/nam-99/ablage/nam/peleke/vcf_files/' + file
     vcf = edit_vcf(vcf_path, 5)
     ecotype_id = file.split('_')[1].split('.')[0]
