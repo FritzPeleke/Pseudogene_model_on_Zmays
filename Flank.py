@@ -1,7 +1,9 @@
 import itertools
 import pandas as pd
+import os
 
-def flank(gtf_file, pro_size):
+
+def flank(gtf_file, out_gtf, pro_size):
     new_start = []
     new_end = []
     records = []
@@ -20,9 +22,10 @@ def flank(gtf_file, pro_size):
     df[4] = new_end
     df[7] = [x.split("\n")[0] for x in df[7]]
 
-    return df.to_csv("/home/peleke/PycharmProjects/Arabidopsis/Athalianagenome/var.1000.gtf",
-                     header=False, index=False, sep='\t')
+    return df.to_csv(out_gtf, header=False, index=False, sep='\t')
 
 
-flank("/home/peleke/PycharmProjects/Arabidopsis/Athalianagenome/Arabidopsis_thaliana.TAIR10.46.var.gtf", 1000)
-#flank("/home/peleke/PycharmProjects/Arabidopsis/Athalianagenome/genes_only_normal.gtf", 1000)
+for file in os.listdir('/nam-99/ablage/nam/peleke/variant_gtfs'):
+    input_gtf = '/nam-99/ablage/nam/peleke/variant_gtfs/' + file
+    output_gtf = '/nam-99/ablage/nam/peleke/1000upstream_gtfs/' + file
+    flank(input_gtf, output_gtf, 1000)
